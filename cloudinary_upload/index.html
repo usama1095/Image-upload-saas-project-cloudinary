@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Upload SaaS - Rana Usama</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    body {
+      background: #f8f9fa;
+      flex: 1 0 auto;
+    }
+    .hero {
+      background: linear-gradient(90deg, #4b6cb7, #182848);
+      color: white;
+      text-align: center;
+      padding: 60px 20px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+    }
+    .image-card {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 250px; /* fixed height for equal sections */
+    }
+    .image-preview {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .progress {
+      height: 5px;
+      margin-top: 5px;
+    }
+    footer {
+      background: #182848;
+      color: white;
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+    footer a {
+      text-decoration: none;
+      margin-right: 10px;
+    }
+    .uplaod {
+      width: 40% ;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1>Image Upload SaaS</h1>
+    <p>Upload multiple images and get instant URLs!</p>
+    <p>Created by <b>Rana Usama</b></p>
+    
+      <div class="mb-2">
+        Created by <b>Rana Usama</b> |
+        <a href="https://www.fiverr.com/ranausama881" class="text-white" target="_blank"><i class="fab fa-fiverr"></i> Fiverr</a>
+        <a href="https://github.com/usama1095" class="text-white" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+        <a href="https://www.instagram.com/ishowtechskills" class="text-white" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+      
+      </div>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="container uplaod mb-5 ml-5 mr-5">
+  <div class="mb-3">
+    <div class="input-group">
+      <input type="file" id="imageInput" class="form-control" multiple>
+      <button id="uploadBtn" class="btn btn-primary">Upload</button>
+    </div>
+  </div>
+  <div id="uploadContainer" class="row g-3"></div>
+</div>
+
+
+  <!-- Footer -->
+  <footer class="text-center mt-auto">
+    <div class="container">
+      <div class="mb-2">
+        Created by <b>Rana Usama</b> |
+        <a href="https://www.fiverr.com/ranausama881" class="text-white" target="_blank"><i class="fab fa-fiverr"></i> Fiverr</a>
+        <a href="https://github.com/usama1095" class="text-white" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+        <a href="https://www.instagram.com/ishowtechskills" class="text-white" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+      
+      </div>
+      <small>&copy; 2025 Rana Usama</small>
+    </div>
+  </footer>
+
+  <script>
+    const cloudName = 'daqmobuym'; // your Cloudinary cloud name
+    const uploadPreset = 'frontend_upload'; // your unsigned upload preset
+
+    const imageInput = document.getElementById('imageInput');
+    const uploadContainer = document.getElementById('uploadContainer');
+    const uploadBtn = document.getElementById('uploadBtn');
+
+    let selectedFiles = [];
+
+    // Preview selected images
+    imageInput.addEventListener('change', (event) => {
+      selectedFiles = Array.from(event.target.files);
+      uploadContainer.innerHTML = '';
+
+      selectedFiles.forEach((file, index) => {
+        const col = document.createElement('div');
+        col.classList.add('col-md-4');
+
+        const card = document.createElement('div');
+        card.classList.add('card', 'p-3', 'shadow-sm', 'bg-white', 'image-card');
+
+        const img = document.createElement('img');
+        img.classList.add('image-preview');
+        img.src = URL.createObjectURL(file);
+
+        const urlInput = document.createElement('input');
+        urlInput.classList.add('form-control', 'mb-2');
+        urlInput.placeholder = 'URL will appear here';
+        urlInput.readOnly = true;
+
+        const progress = document.createElement('div');
+        progress.classList.add('progress');
+        const progressBar = document.createElement('div');
+        progressBar.classList.add('progress-bar', 'progress-bar-striped', 'progress-bar-animated');
+        progressBar.style.width = '0%';
+        progress.appendChild(progressBar);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.classList.add('btn', 'btn-sm', 'btn-success', 'mt-2');
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy URL';
+        copyBtn.disabled = true;
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(urlInput.value);
+          copyBtn.innerText = 'Copied!';
+          setTimeout(() => copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy URL', 1500);
+        });
+
+        card.appendChild(img);
+        card.appendChild(urlInput);
+        card.appendChild(progress);
+        card.appendChild(copyBtn);
+        col.appendChild(card);
+        uploadContainer.appendChild(col);
+      });
+    });
+
+    // Upload images one by one
+    uploadBtn.addEventListener('click', async () => {
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', uploadPreset);
+
+        const card = uploadContainer.children[i].firstChild;
+        const urlInput = card.querySelector('input');
+        const progressBar = card.querySelector('.progress-bar');
+        const copyBtn = card.querySelector('button');
+
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`);
+          xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              const percent = (e.loaded / e.total) * 100;
+              progressBar.style.width = percent + '%';
+            }
+          });
+          xhr.onload = () => {
+            const data = JSON.parse(xhr.responseText);
+            urlInput.value = data.secure_url;
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.add('bg-success');
+            copyBtn.disabled = false;
+          };
+          xhr.send(formData);
+        } catch (error) {
+          urlInput.value = 'Upload failed!';
+          console.error('Upload error:', error);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
